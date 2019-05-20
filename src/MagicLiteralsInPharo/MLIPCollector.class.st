@@ -31,9 +31,10 @@ MLIPCollector class >> isLiteralNode: astNode [
 		((astNode class = RBLiteralValueNode and: [ 
 			astNode value isSymbol or: [ 
 				(self isBooleanValue: astNode value) or: [
-					astNode value isNil  ] ] ]) or: [ 
+					astNode value isNil ] ] ]) or: [ 
 						(self isPragmasArgument: astNode) or: [ 
-							self isDirectlyAssigned: astNode ] ]) not ]
+							(self isDirectlyAssigned: astNode) or: [ 
+								astNode isLiteralArray and: [ astNode contents isEmpty ] ] ] ]) not ]
 ]
 
 { #category : #testing }
