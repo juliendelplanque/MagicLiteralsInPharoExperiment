@@ -21,12 +21,19 @@ MLIPCollector class >> isBooleanValue: astNode [
 ]
 
 { #category : #testing }
+MLIPCollector class >> isDirectlyAssigned: literalNode [
+	^ literalNode parent isAssignment
+]
+
+{ #category : #testing }
 MLIPCollector class >> isLiteralNode: astNode [
 	^ astNode isLiteralNode and: [ 
-		(astNode class = RBLiteralValueNode and: [ 
+		((astNode class = RBLiteralValueNode and: [ 
 			astNode value isSymbol or: [ 
-				(self isBooleanValue: astNode value) or: [ 
-					astNode value isNil ] ] ]) not ]
+				(self isBooleanValue: astNode value) or: [
+					astNode value isNil  ] ] ]) or: [ 
+						(self isPragmasArgument: astNode) or: [ 
+							self isDirectlyAssigned: astNode ] ]) not ]
 ]
 
 { #category : #testing }
@@ -47,6 +54,11 @@ MLIPCollector class >> isMethodReturningPoint: ast [
 		checkMatch;
 		predicate: (MLIPCollector methodReturningPointPredicate);
 		runOn: ast childrenBlock: #children.
+]
+
+{ #category : #testing }
+MLIPCollector class >> isPragmasArgument: literalNode [
+	^ literalNode parent isPragma
 ]
 
 { #category : #predicates }
