@@ -5,6 +5,13 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+FakeClass >> methodHoldingTrueFalseNilLiterals [
+	true.
+	false.
+	nil
+]
+
+{ #category : #'as yet unclassified' }
 FakeClass >> methodReturningLiteral [
 	^ 42
 ]
