@@ -9,10 +9,23 @@ Class {
 
 { #category : #'literals extraction' }
 MLIPCollector class >> extractLiteralNodesFromAST: ast [
+	^ ast allChildren select: [ :n | self isLiteralNode: n ]
+]
+
+{ #category : #'magic extraction' }
+MLIPCollector class >> extractMagicLiterals: ast [
 	((self isMethodReturningLiteral: ast) or: [ self isMethodReturningPoint: ast ])
 		ifTrue: [ ^ #() ].
-
-	^ ast allChildren select: [ :n | self isLiteralNode: n ]
+		
+	^ (self extractLiteralNodesFromAST: ast) reject: [ :astNode |
+		(astNode class = RBLiteralValueNode and: [ 
+			astNode value isSymbol or: [ 
+				(self isBooleanValue: astNode value) or: [
+					astNode value isNil
+						or: [ astNode value isString and: [ astNode value isEmpty ] ] ] ] ]) or: [ 
+						(self isPragmasArgument: astNode) or: [ 
+							(self isDirectlyAssigned: astNode) or: [ 
+								astNode isLiteralArray and: [ astNode contents isEmpty ] ] ] ] ]
 ]
 
 { #category : #testing }
@@ -27,14 +40,7 @@ MLIPCollector class >> isDirectlyAssigned: literalNode [
 
 { #category : #testing }
 MLIPCollector class >> isLiteralNode: astNode [
-	^ astNode isLiteralNode and: [ 
-		((astNode class = RBLiteralValueNode and: [ 
-			astNode value isSymbol or: [ 
-				(self isBooleanValue: astNode value) or: [
-					astNode value isNil ] ] ]) or: [ 
-						(self isPragmasArgument: astNode) or: [ 
-							(self isDirectlyAssigned: astNode) or: [ 
-								astNode isLiteralArray and: [ astNode contents isEmpty ] ] ] ]) not ]
+	^ astNode isLiteralNode
 ]
 
 { #category : #testing }
