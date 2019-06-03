@@ -4,6 +4,9 @@ Class {
 	#instVars : [
 		'methodsWithLiterals'
 	],
+	#classInstVars : [
+		'trie'
+	],
 	#category : #MagicLiteralsInPharo
 }
 
@@ -91,6 +94,11 @@ MLIPCollector class >> methodReturningPointPredicate [
 			}
 		}
 	}
+]
+
+{ #category : #accessing }
+MLIPCollector class >> trie [
+	^ trie ifNil: [ trie := CTTrie readFromFile: '/Users/julien/Documents/GIT/english-words/words.txt' ]
 ]
 
 { #category : #collecting }
