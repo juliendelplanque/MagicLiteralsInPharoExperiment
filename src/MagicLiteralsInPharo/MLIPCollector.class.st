@@ -96,9 +96,15 @@ MLIPCollector class >> methodReturningPointPredicate [
 	}
 ]
 
+{ #category : #initialization }
+MLIPCollector class >> resetTrie [
+	<script>
+	trie := nil
+]
+
 { #category : #accessing }
 MLIPCollector class >> trie [
-	^ trie ifNil: [ trie := CTTrie readFromFile: '/Users/julien/Documents/GIT/english-words/words.txt' ]
+	^ trie ifNil: [ trie := CTTrie readFromFile: '/Users/julien/Documents/GIT/english-words/words.txt' asFileReference withLineTransformer: #asLowercase ]
 ]
 
 { #category : #collecting }
