@@ -25,7 +25,7 @@ MLIPCollector class >> extractMagicLiterals: ast [
 			astNode value isSymbol or: [ 
 				(self isBooleanValue: astNode value) or: [
 					astNode value isNil or: [ 
-						astNode value isString and: [ astNode value isEmpty or: [ (astNode value mlipKnowWordsRatioWith: self trie) > 0.5 ] ] ] ] ] ]) or: [ 
+						astNode value isString and: [ astNode value isEmpty or: [ (astNode value mlipKnownWordsRatioWith: self trie) > 0.5 ] ] ] ] ] ]) or: [ 
 						(self isPragmasArgument: astNode) or: [ 
 							(self isDirectlyAssigned: astNode) or: [ 
 								astNode isLiteralArray and: [ astNode contents isEmpty ] ] ] ] ]
