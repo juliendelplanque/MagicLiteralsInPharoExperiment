@@ -2,5 +2,10 @@ Extension { #name : #CompiledMethod }
 
 { #category : #'*MagicLiteralsInPharo' }
 CompiledMethod >> literalNodes [
-	^ MLIPCollector extractLiteralNodesFromAST: self ast
+	^ self ast literalNodes
+]
+
+{ #category : #'*MagicLiteralsInPharo' }
+CompiledMethod >> magicLiteralNodes [
+	^ self ast magicLiteralNodes
 ]

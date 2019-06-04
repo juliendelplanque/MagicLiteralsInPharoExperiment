@@ -8,5 +8,5 @@ String >> mlipKnownWordsRatioWith: trie [
 
 { #category : #'*MagicLiteralsInPharo' }
 String >> mlipTokens [
-	^ self substrings collect: [ :s | s asLowercase select: #isLetter ]
+	^ self substrings collect: [ :s | s asLowercase select: #isLetter ] thenReject: #isEmpty
 ]
