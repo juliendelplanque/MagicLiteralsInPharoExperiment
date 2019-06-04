@@ -23,7 +23,8 @@ MLIPCompositeMagicLiteralFilter class >> withDefaultFilters [
 		MLIPNilFilter new.
 		MLIPPragmaArgumentFilter new.
 		MLIPStringFilter new.
-		MLIPSymbolFilter new }
+		MLIPSymbolFilter new  } ,
+		(#(#to: #to:by: #to:do: #timesRepeat:) collect: [ :selector | MLIPTargetToMessageLiteralFilter selector: selector ])
 ]
 
 { #category : #adding }
