@@ -6,7 +6,8 @@ Class {
 
 { #category : #testing }
 MLIPArgumentOfMessageLiteralFilter >> isNotMagicLiteral: literalNode [
-	^ literalNode parent isMessage and: [ 
-		literalNode parent receiver ~= literalNode and: [ 
-			literalNode parent selector = self selector ] ]
+	^ (literalNode value isKindOf: self literalType) and: [ 
+		literalNode parent isMessage and: [ 
+			literalNode parent receiver ~= literalNode and: [ 
+				literalNode parent selector = self selector ] ] ]
 ]
