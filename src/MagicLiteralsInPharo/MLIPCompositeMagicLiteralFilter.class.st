@@ -23,11 +23,10 @@ MLIPCompositeMagicLiteralFilter class >> withDefaultFilters [
 		MLIPNilFilter new.
 		MLIPPragmaArgumentFilter new.
 		MLIPStringFilter new.
-		MLIPSymbolFilter new.
-		MLIPArgumentOfMessageLiteralFilter  } ,
+		MLIPSymbolFilter new  } ,
 		(#(#to: #to:by: #to:do: #timesRepeat:) collect: [ :selector | MLIPTargetToMessageLiteralFilter selector: selector literalType: Integer ]) ,
 		(#(#nextPut: #<<) collect: [ :selector | MLIPArgumentOfMessageLiteralFilter selector: selector literalType: Character ]) ,
-		(#(#nextPutAll: #<<) collect: [ :selector | MLIPArgumentOfMessageLiteralFilter selector: selector literalType: String ])
+		(#(#nextPutAll: #<< #name:) collect: [ :selector | MLIPArgumentOfMessageLiteralFilter selector: selector literalType: String ])
 ]
 
 { #category : #adding }
