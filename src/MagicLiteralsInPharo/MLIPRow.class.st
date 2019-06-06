@@ -4,6 +4,11 @@ Class {
 	#category : #'MagicLiteralsInPharo-Core'
 }
 
+{ #category : #accessing }
+MLIPRow >> ast [
+	^ RBParser parseMethod: (self atColumnNamed: 'source_code')
+]
+
 { #category : #'inspector extensions' }
 MLIPRow >> gtInspectorSourceIn: composite [
 	<gtInspectorPresentationOrder: 30>
