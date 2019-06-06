@@ -34,7 +34,9 @@ MLIPArgumentOfMessageLiteralFilter >> expectedIndex: anObject [
 { #category : #testing }
 MLIPArgumentOfMessageLiteralFilter >> isNotMagicLiteral: literalNode [
 	| indexOfArgument |
-	indexOfArgument := literalNode parent arguments indexOf: literalNode.
+	indexOfArgument := literalNode parent isMessage
+								ifTrue: [ literalNode parent arguments indexOf: literalNode ]
+								ifFalse: [ -1 "Same value as if #indexOf: found nothing." ].
 	^ (self literalValidationBlock value: literalNode) and: [ 
 		(self expectedIndex isNil or: [ self expectedIndex = indexOfArgument ]) and: [
 			literalNode parent isMessage and: [ 
