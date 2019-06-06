@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'filter'
 	],
-	#category : #'MagicLiteralsInPharo-Tests'
+	#category : #'MagicLiteralsInPharo-Tests-Filters'
 }
 
 { #category : #running }
