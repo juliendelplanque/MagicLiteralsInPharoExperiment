@@ -19,9 +19,16 @@ MLIPAnalysis >> databaseFile: anObject [
 
 { #category : #'plot generation' }
 MLIPAnalysis >> generatePlotsIn: aDirectory [
+	| fileNamesSeen |
+	fileNamesSeen := Set new.
 	(Pragma allNamed: #plotInFileNamed: in: self class) do: [ :pragma |
+		|fileName|
+		fileName := pragma argumentAt: 1.
+		(fileNamesSeen includes: fileName)
+			ifTrue: [ self error: 'Duplicated file names for plots. Aborting.' ]
+			ifFalse: [ fileNamesSeen add: fileName ].
 		(pragma methodSelector value: self)
-			generateIn: aDirectory / (pragma argumentAt: 1) ]
+			generateIn: aDirectory / fileName ]
 ]
 
 { #category : #computation }
