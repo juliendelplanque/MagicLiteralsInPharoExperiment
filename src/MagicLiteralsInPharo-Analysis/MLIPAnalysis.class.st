@@ -17,6 +17,13 @@ MLIPAnalysis >> databaseFile: anObject [
 	databaseFile := anObject
 ]
 
+{ #category : #'plot generation' }
+MLIPAnalysis >> generatePlotsIn: aDirectory [
+	(Pragma allNamed: #plotInFileNamed: in: self class) do: [ :pragma |
+		(pragma methodSelector value: self)
+			generateIn: aDirectory / (pragma argumentAt: 1) ]
+]
+
 { #category : #computation }
 MLIPAnalysis >> repartitionMagicLiteralsAtClassLevelData [
 	^ self databaseFile sqlite3ConnectionDo: [ :c |
@@ -35,6 +42,7 @@ MLIPAnalysis >> repartitionMagicLiteralsAtClassLevelData [
 
 { #category : #plotting }
 MLIPAnalysis >> repartitionMagicLiteralsAtClassLevelPlot [
+	<plotInFileNamed: 'repartition-class-level.pdf'>
 	| data |
 	data := self repartitionMagicLiteralsAtClassLevelData.
 	^ MLBScatterPlot2 new
@@ -49,8 +57,8 @@ MLIPAnalysis >> repartitionMagicLiteralsAtClassLevelPlot [
 				title: '# methods with at least one magic literal' ];
 		configYAxis: [ :yAxis |
 			yAxis
-				title: '# magic literals in all methods of the class (log scale)'";
-				logScale" ];
+				title: '# magic literals in all methods of the class (log scale)';
+				logScale ];
 		yourself
 ]
 
@@ -72,6 +80,7 @@ MLIPAnalysis >> repartitionMagicLiteralsAtProbablePackageLevelData [
 
 { #category : #plotting }
 MLIPAnalysis >> repartitionMagicLiteralsAtProbablePackageLevelPlot [
+	<plotInFileNamed: 'repartition-probable-package-level.pdf'>
 	| data |
 	data := self repartitionMagicLiteralsAtProbablePackageLevelData.
 	^ MLBScatterPlot2 new
