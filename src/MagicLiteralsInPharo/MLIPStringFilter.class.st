@@ -1,11 +1,19 @@
 Class {
 	#name : #MLIPStringFilter,
 	#superclass : #MLIPMagicLiteralFilter,
+	#instVars : [
+		'knownWordsRatioThreshold'
+	],
 	#classInstVars : [
 		'trie'
 	],
 	#category : #'MagicLiteralsInPharo-Filters'
 }
+
+{ #category : #accessing }
+MLIPStringFilter class >> defaultKnownWordsRatioThreshold [
+	^ 0.5
+]
 
 { #category : #accessing }
 MLIPStringFilter class >> resetTrie [
@@ -24,6 +32,11 @@ MLIPStringFilter class >> trie [
 		trie ]
 ]
 
+{ #category : #accessing }
+MLIPStringFilter >> defaultKnownWordsRatioThreshold [
+	^ self class defaultKnownWordsRatioThreshold
+]
+
 { #category : #testing }
 MLIPStringFilter >> isNotMagicLiteral: literalNode [
 	^ literalNode class = RBLiteralValueNode
@@ -34,7 +47,12 @@ MLIPStringFilter >> isNotMagicLiteral: literalNode [
 
 { #category : #testing }
 MLIPStringFilter >> knownWordsRatioThreshold [
-	^ 0.5
+	^ knownWordsRatioThreshold ifNil: [ knownWordsRatioThreshold := self defaultKnownWordsRatioThreshold ]
+]
+
+{ #category : #accessing }
+MLIPStringFilter >> knownWordsRatioThreshold: anObject [
+	knownWordsRatioThreshold := anObject
 ]
 
 { #category : #accessing }
