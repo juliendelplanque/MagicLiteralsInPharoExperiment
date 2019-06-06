@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'filters'
 	],
-	#category : #MagicLiteralsInPharo
+	#category : #'MagicLiteralsInPharo-Filters'
 }
 
 { #category : #'instance creation' }

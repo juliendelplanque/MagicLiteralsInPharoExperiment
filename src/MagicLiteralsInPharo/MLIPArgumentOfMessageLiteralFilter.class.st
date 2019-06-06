@@ -1,7 +1,7 @@
 Class {
 	#name : #MLIPArgumentOfMessageLiteralFilter,
 	#superclass : #MLIPTargetToMessageLiteralFilter,
-	#category : #MagicLiteralsInPharo
+	#category : #'MagicLiteralsInPharo-Filters'
 }
 
 { #category : #testing }

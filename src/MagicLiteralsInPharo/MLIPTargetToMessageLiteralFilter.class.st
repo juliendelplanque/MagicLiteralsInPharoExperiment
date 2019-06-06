@@ -5,7 +5,7 @@ Class {
 		'selector',
 		'literalType'
 	],
-	#category : #MagicLiteralsInPharo
+	#category : #'MagicLiteralsInPharo-Filters'
 }
 
 { #category : #'instance creation' }

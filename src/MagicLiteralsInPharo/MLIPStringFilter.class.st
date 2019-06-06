@@ -4,7 +4,7 @@ Class {
 	#classInstVars : [
 		'trie'
 	],
-	#category : #MagicLiteralsInPharo
+	#category : #'MagicLiteralsInPharo-Filters'
 }
 
 { #category : #accessing }
@@ -15,7 +15,13 @@ MLIPStringFilter class >> resetTrie [
 
 { #category : #accessing }
 MLIPStringFilter class >> trie [
-	^ trie ifNil: [ trie := CTTrie readFromFile: '/Users/julien/Documents/GIT/english-words/words.txt' asFileReference withLineTransformer: #asLowercase ]
+	^ trie ifNil: [ |memoryFile|
+		memoryFile := FileSystem memory / 'words.txt'.
+		memoryFile writeStreamDo: [ :s |
+			s nextPutAll: (ZnEasy get: 'https://github.com/dwyl/english-words/blob/master/words.txt?raw=true') contents ].
+		trie := CTTrie readFromFile: memoryFile withLineTransformer: #asLowercase.
+		memoryFile ensureDelete.
+		trie ]
 ]
 
 { #category : #testing }

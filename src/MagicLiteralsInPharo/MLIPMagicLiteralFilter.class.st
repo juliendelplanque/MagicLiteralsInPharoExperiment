@@ -1,7 +1,7 @@
 Class {
 	#name : #MLIPMagicLiteralFilter,
 	#superclass : #Object,
-	#category : #MagicLiteralsInPharo
+	#category : #'MagicLiteralsInPharo-Filters'
 }
 
 { #category : #testing }

@@ -4,7 +4,7 @@ Class {
 	#classInstVars : [
 		'trie'
 	],
-	#category : #MagicLiteralsInPharo
+	#category : #'MagicLiteralsInPharo-Core'
 }
 
 { #category : #adding }

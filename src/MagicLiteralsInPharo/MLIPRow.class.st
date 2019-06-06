@@ -1,7 +1,7 @@
 Class {
 	#name : #MLIPRow,
 	#superclass : #SQLite3Row,
-	#category : #MagicLiteralsInPharo
+	#category : #'MagicLiteralsInPharo-Core'
 }
 
 { #category : #'inspector extensions' }
