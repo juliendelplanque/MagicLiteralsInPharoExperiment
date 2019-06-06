@@ -3,7 +3,7 @@ Class {
 	#superclass : #MLIPMagicLiteralFilter,
 	#instVars : [
 		'selector',
-		'literalType'
+		'literalValidationBlock'
 	],
 	#category : #'MagicLiteralsInPharo-Filters'
 }
@@ -16,22 +16,40 @@ MLIPTargetToMessageLiteralFilter class >> selector: aSymbol literalType: aClass 
 		yourself
 ]
 
+{ #category : #'instance creation' }
+MLIPTargetToMessageLiteralFilter class >> selector: aSymbol literalValue: anObject [
+	^ self new
+		selector: aSymbol;
+		literalValue: anObject;
+		yourself
+]
+
 { #category : #testing }
 MLIPTargetToMessageLiteralFilter >> isNotMagicLiteral: literalNode [
-	^ (literalNode value isKindOf: self literalType) and: [ 
+	^ (self literalValidationBlock value: literalNode) and: [ 
 		literalNode parent isMessage and: [ 
 			literalNode parent receiver = literalNode and: [ 
 				literalNode parent selector = self selector ] ] ]
 ]
 
 { #category : #accessing }
-MLIPTargetToMessageLiteralFilter >> literalType [
-	^ literalType
+MLIPTargetToMessageLiteralFilter >> literalType: aClass [
+	self literalValidationBlock: [ :astNode | astNode value isKindOf: aClass ]
 ]
 
 { #category : #accessing }
-MLIPTargetToMessageLiteralFilter >> literalType: anObject [
-	literalType := anObject
+MLIPTargetToMessageLiteralFilter >> literalValidationBlock [
+	^ literalValidationBlock
+]
+
+{ #category : #accessing }
+MLIPTargetToMessageLiteralFilter >> literalValidationBlock: anObject [
+	literalValidationBlock := anObject
+]
+
+{ #category : #accessing }
+MLIPTargetToMessageLiteralFilter >> literalValue: anObject [
+	self literalValidationBlock: [ :astNode | astNode value = anObject ]
 ]
 
 { #category : #accessing }
