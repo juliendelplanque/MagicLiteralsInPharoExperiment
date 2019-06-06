@@ -14,7 +14,7 @@ MLIPCompositeMagicLiteralFilter class >> filters: aCollectionOfMLIPMagicLiteralF
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 MLIPCompositeMagicLiteralFilter class >> withDefaultFilters [
 	^ self filters: { 
 		MLIPBooleanFilter new.
