@@ -23,7 +23,9 @@ MLIPCompositeMagicLiteralFilter class >> withDefaultFilters [
 		MLIPNilFilter new.
 		MLIPPragmaArgumentFilter new.
 		MLIPStringFilter new.
-		MLIPSymbolFilter new  } ,
+		MLIPSymbolFilter new.
+		MLIPLiteralInLiteralArrayFilter new.
+		MLIPArgumentOfMessageLiteralFilter selector: #extent:depth:fromArray:offset: literalType: ByteArray index: 3 } ,
 		(#(#to: #to:by: #to:do: #timesRepeat:) collect: [ :selector | MLIPTargetToMessageLiteralFilter selector: selector literalType: Integer ]) ,
 		(#(#nextPut: #<<) collect: [ :selector | MLIPArgumentOfMessageLiteralFilter selector: selector literalType: Character ]) ,
 		(#(#nextPutAll: #<< #name:) collect: [ :selector | MLIPArgumentOfMessageLiteralFilter selector: selector literalType: String ])
