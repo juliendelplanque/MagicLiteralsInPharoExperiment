@@ -101,7 +101,7 @@ MLIPAnalysis >> repartitionMagicLiteralsAtProbablePackageLevelPlot [
 				title: '# classes with at least one magic literal' ];
 		configYAxis: [ :yAxis |
 			yAxis
-				title: '# magic literals in all methods of all classes of the package'";
-				logScale" ];
+				title: '# magic literals in all methods of all classes of the package';
+				logScale ];
 		yourself.
 ]
