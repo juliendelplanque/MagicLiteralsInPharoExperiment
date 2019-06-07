@@ -8,7 +8,8 @@ Class {
 		'filter1',
 		'filter2',
 		'filter3',
-		'filter4'
+		'filter4',
+		'filter5'
 	],
 	#category : #'MagicLiteralsInPharo-Tests-Filters'
 }
@@ -20,6 +21,7 @@ MLIPArgumentOfMessageLiteralFilterTest >> setUp [
 	filter2 := MLIPArgumentOfMessageLiteralFilter selector: #copyFrom:to: literalValue: 1.
 	filter3 := MLIPArgumentOfMessageLiteralFilter selector: #copyFrom:to: literalType: Integer index: 2.
 	filter4 := MLIPArgumentOfMessageLiteralFilter selector: #copyFrom:to: literalValue: 42 index: 2.
+	filter5 := MLIPArgumentOfMessageLiteralFilter selector: #+ literalValue: 1 index: 1.
 ]
 
 { #category : #test }
@@ -85,4 +87,14 @@ MLIPArgumentOfMessageLiteralFilterTest >> testIsNotMagicLiteral5 [
 	
 	self deny: (filter4 isNotMagicLiteral: literalNode1).
 	self deny: (filter4 isNotMagicLiteral: literalNode2).
+]
+
+{ #category : #test }
+MLIPArgumentOfMessageLiteralFilterTest >> testIsNotMagicLiteral6 [
+	| literalNode1 messageNode |
+	literalNode1 := RBLiteralValueNode value: 1.
+	messageNode := RBMessageNode receiver: (RBVariableNode named: 'foo') selector: #+ arguments: {literalNode1}.
+	literalNode1 parent: messageNode.
+	
+	self assert: (filter5 isNotMagicLiteral: literalNode1).
 ]
