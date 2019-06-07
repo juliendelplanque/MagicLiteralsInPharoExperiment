@@ -61,11 +61,13 @@ MLIPAnalysis >> repartitionMagicLiteralsAtClassLevelPlot [
 				yourself ]);
 		configXAxis: [ :xAxis |
 			xAxis
-				title: '# methods with at least one magic literal' ];
+				title: '# methods with at least one magic literal';
+				max: 1000 ];
 		configYAxis: [ :yAxis |
 			yAxis
 				title: '# magic literals in all methods of the class (log scale)';
-				logScale ];
+				max: 1000";
+				logScale" ];
 		yourself
 ]
 
@@ -98,10 +100,10 @@ MLIPAnalysis >> repartitionMagicLiteralsAtProbablePackageLevelPlot [
 				yourself ]);
 		configXAxis: [ :xAxis |
 			xAxis
-				title: '# classes with at least one magic literal' ];
+				title: '# classes with at least one magic literal'; max: 5000 ];
 		configYAxis: [ :yAxis |
 			yAxis
-				title: '# magic literals in all methods of all classes of the package';
-				logScale ];
+				title: '# magic literals in all methods of all classes of the package'; max: 5000";
+				logScale" ];
 		yourself.
 ]
