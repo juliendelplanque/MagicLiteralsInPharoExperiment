@@ -6,5 +6,9 @@ Class {
 
 { #category : #testing }
 MLIPDirectlyAssignedFilter >> isNotMagicLiteral: literalNode [
-	^ literalNode parent isAssignment
+	|parents assignmentIndex|
+	parents := literalNode parents.
+	assignmentIndex := parents detectIndex: #isAssignment ifNone: [ ^ false ].	
+	^ (parents copyFrom: assignmentIndex + 1 to: parents size - 1)
+		allSatisfy: [ :node | node isLiteralArray ]
 ]
