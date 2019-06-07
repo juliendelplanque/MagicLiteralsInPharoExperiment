@@ -25,6 +25,7 @@ MLIPCompositeMagicLiteralFilter class >> withDefaultFilters [
 		MLIPStringFilter new.
 		MLIPSymbolFilter new.
 		MLIPLiteralInLiteralArrayFilter new.
+		MLIPZeroFilter new.
 		MLIPArgumentOfMessageLiteralFilter selector: #extent:depth:fromArray:offset: literalType: ByteArray index: 3.
 		MLIPArgumentOfMessageLiteralFilter selector: #+ literalValue: 1 index: 1.
 		MLIPArgumentOfMessageLiteralFilter selector: #- literalValue: 1 index: 1 } ,
