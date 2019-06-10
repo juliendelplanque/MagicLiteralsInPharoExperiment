@@ -38,6 +38,20 @@ MLIPAnalysis >> databaseFile: anObject [
 ]
 
 { #category : #'plot generation' }
+MLIPAnalysis >> generateLatexIn: aDirectory [
+	| fileNamesSeen |
+	fileNamesSeen := Set new.
+	(Pragma allNamed: #latexInFileNamed: in: self class) do: [ :pragma |
+		|fileName|
+		fileName := pragma argumentAt: 1.
+		(fileNamesSeen includes: fileName)
+			ifTrue: [ self error: 'Duplicated file names for latex. Aborting.' ]
+			ifFalse: [ fileNamesSeen add: fileName ].
+		(aDirectory / fileName) writeStreamDo: [ :stream |
+			stream nextPutAll: (pragma methodSelector value: self) ] ]
+]
+
+{ #category : #'plot generation' }
 MLIPAnalysis >> generatePlotsIn: aDirectory [
 	| fileNamesSeen |
 	fileNamesSeen := Set new.
@@ -63,14 +77,17 @@ MLIPAnalysis >> literalsOccurencesInTestsAndNonTests [
 
 { #category : #latexing }
 MLIPAnalysis >> literalsOccurencesInTestsAndNonTestsLatexTable [
+	<latexInFileNamed: 'occurences-tests-nontests.tex'>
 	^ String streamContents: [ :stream |
+		stream nextPutAll: '\begin{tabular}{l|c|c|c}'.
 		stream nextPutAll: 'Class & Total Occurences & Occurences in tests & Occurences in non-tests \\',String lf.
 		stream nextPutAll: '\hline\hline',String lf.
 		self literalsOccurencesInTestsAndNonTests do: [ :assoc |
 			stream nextPutAll: assoc key printString.
 			stream nextPutAll: ' & '.
 			assoc value do: [ :v | stream nextPutAll: v printString ] separatedBy: [ stream nextPutAll: ' & ' ].
-			stream nextPutAll: ' \\',String lf. ] ].
+			stream nextPutAll: ' \\',String lf ].
+		stream nextPutAll: '\end{tabular}' ].
 ]
 
 { #category : #plotting }
