@@ -47,7 +47,7 @@ MLIPAnalysis >> generateLatexIn: aDirectory [
 		(fileNamesSeen includes: fileName)
 			ifTrue: [ self error: 'Duplicated file names for latex. Aborting.' ]
 			ifFalse: [ fileNamesSeen add: fileName ].
-		(aDirectory / fileName) writeStreamDo: [ :stream |
+		(aDirectory / fileName) ensureDelete writeStreamDo: [ :stream |
 			stream nextPutAll: (pragma methodSelector value: self) ] ]
 ]
 
@@ -62,7 +62,7 @@ MLIPAnalysis >> generatePlotsIn: aDirectory [
 			ifTrue: [ self error: 'Duplicated file names for plots. Aborting.' ]
 			ifFalse: [ fileNamesSeen add: fileName ].
 		(pragma methodSelector value: self)
-			generateIn: aDirectory / fileName ]
+			generateIn: (aDirectory / fileName) ensureDelete ]
 ]
 
 { #category : #computation }
@@ -72,7 +72,7 @@ MLIPAnalysis >> literalsOccurencesInTestsAndNonTests [
 			groupedBy: [ :l | self typeAggregationDict at: l value class ]) collect: [ :literals | 
 		|fromTestCases|
 		fromTestCases := literals select: [ :node | node parents first propertyAt: #isFromTestCase ].
-		{ literals size . fromTestCases size. literals size - fromTestCases size } ]) associations sort: [ :assoc | assoc value first ] asSortFunction reversed) ]
+		{ literals size . fromTestCases size / literals size. (literals size - fromTestCases size) / literals size } ]) associations sort: [ :assoc | assoc value first ] asSortFunction reversed) ]
 ]
 
 { #category : #latexing }
@@ -80,12 +80,14 @@ MLIPAnalysis >> literalsOccurencesInTestsAndNonTestsLatexTable [
 	<latexInFileNamed: 'occurences-tests-nontests.tex'>
 	^ String streamContents: [ :stream |
 		stream nextPutAll: '\begin{tabular}{l|c|c|c}'.
-		stream nextPutAll: 'Class & Total Occurences & Occurences in tests & Occurences in non-tests \\',String lf.
+		stream nextPutAll: 'Class & Total Occurences & \% in tests & \% in non-tests \\',String lf.
 		stream nextPutAll: '\hline\hline',String lf.
 		self literalsOccurencesInTestsAndNonTests do: [ :assoc |
 			stream nextPutAll: assoc key printString.
 			stream nextPutAll: ' & '.
-			assoc value do: [ :v | stream nextPutAll: v printString ] separatedBy: [ stream nextPutAll: ' & ' ].
+			stream nextPutAll: assoc value first printString.
+			stream nextPutAll: ' & '.
+			assoc value allButFirst do: [ :v | stream nextPutAll: ((v * 100) printShowingDecimalPlaces: 2) ] separatedBy: [ stream nextPutAll: ' & ' ].
 			stream nextPutAll: ' \\',String lf ].
 		stream nextPutAll: '\end{tabular}' ].
 ]
