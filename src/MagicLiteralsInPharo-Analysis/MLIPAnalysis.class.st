@@ -2,10 +2,30 @@ Class {
 	#name : #MLIPAnalysis,
 	#superclass : #Object,
 	#instVars : [
-		'databaseFile'
+		'databaseFile',
+		'literalsOccurencesInTestsAndNonTests'
 	],
 	#category : #'MagicLiteralsInPharo-Analysis'
 }
+
+{ #category : #computation }
+MLIPAnalysis >> allLiteralNodes [
+	^ self databaseFile sqlite3ConnectionDo: [ :connection |
+		Array streamContents: [ :literalsStream |
+			(connection execute: 'SELECT method.id, method.source_code , class.is_test_case FROM method, class WHERE method.class_id = class.id;') do: [ :row |
+				|nodes|
+				nodes := [ |ast|
+					ast := (RBParser parseMethod: (row atColumnNamed: 'source_code')).
+					ast propertyAt: #isFromTestCase put: (row atColumnNamed: 'is_test_case') = 1.
+					ast literalNodes
+				] on: SyntaxErrorNotification do: [ #() ].
+				literalsStream nextPutAll: nodes ] ] ].
+]
+
+{ #category : #computation }
+MLIPAnalysis >> allLiteralNodesNotInLiteralArray [
+	^ self allLiteralNodes reject: [ :node | node parent class = RBLiteralArrayNode ]
+]
 
 { #category : #accessing }
 MLIPAnalysis >> databaseFile [
@@ -32,6 +52,44 @@ MLIPAnalysis >> generatePlotsIn: aDirectory [
 ]
 
 { #category : #computation }
+MLIPAnalysis >> literalsOccurencesInTestsAndNonTests [
+	^ literalsOccurencesInTestsAndNonTests ifNil: [ 
+		literalsOccurencesInTestsAndNonTests := (((self allLiteralNodesNotInLiteralArray 
+			groupedBy: [ :l | self typeAggregationDict at: l value class ]) collect: [ :literals | 
+		|fromTestCases|
+		fromTestCases := literals select: [ :node | node parents first propertyAt: #isFromTestCase ].
+		{ literals size . fromTestCases size. literals size - fromTestCases size } ]) associations sort: [ :assoc | assoc value first ] asSortFunction reversed) ]
+]
+
+{ #category : #latexing }
+MLIPAnalysis >> literalsOccurencesInTestsAndNonTestsLatexTable [
+	^ String streamContents: [ :stream |
+		stream nextPutAll: 'Class & Total Occurences & Occurences in tests & Occurences in non-tests \\',String lf.
+		stream nextPutAll: '\hline\hline',String lf.
+		self literalsOccurencesInTestsAndNonTests do: [ :assoc |
+			stream nextPutAll: assoc key printString.
+			stream nextPutAll: ' & '.
+			assoc value do: [ :v | stream nextPutAll: v printString ] separatedBy: [ stream nextPutAll: ' & ' ].
+			stream nextPutAll: ' \\',String lf. ] ].
+]
+
+{ #category : #plotting }
+MLIPAnalysis >> literalsOccurencesInTestsAndNonTestsPlot [
+	<plotInFileNamed: 'literals-occurence-tests-nontests.pdf'>
+	| data |
+	data := self literalsOccurencesInTestsAndNonTests.
+	
+	^ MLBStackedBarPlot new
+		dataList: (data collect: [ :assoc | assoc value allButFirst ]);
+		labels: (data collect: [:assoc | assoc key printString ]);
+		colorList: { Color black . Color gray };
+		configXAxis: [ :xAxis |
+			xAxis
+				labelsRotation: 90 ]
+		yourself
+]
+
+{ #category : #computation }
 MLIPAnalysis >> repartitionMagicLiteralsAtClassLevelData [
 	^ self databaseFile sqlite3ConnectionDo: [ :c |
 		(c execute: 'SELECT class.name, COUNT(*) AS methods_with_magic, SUM(literals_metadata.magic_literals_count) AS magic_count
@@ -49,7 +107,7 @@ MLIPAnalysis >> repartitionMagicLiteralsAtClassLevelData [
 
 { #category : #plotting }
 MLIPAnalysis >> repartitionMagicLiteralsAtClassLevelPlot [
-	<plotInFileNamed: 'repartition-class-level.pdf'>
+	"<plotInFileNamed: 'repartition-class-level.pdf'>"
 	| data |
 	data := self repartitionMagicLiteralsAtClassLevelData.
 	^ MLBScatterPlot2 new
@@ -89,7 +147,7 @@ MLIPAnalysis >> repartitionMagicLiteralsAtProbablePackageLevelData [
 
 { #category : #plotting }
 MLIPAnalysis >> repartitionMagicLiteralsAtProbablePackageLevelPlot [
-	<plotInFileNamed: 'repartition-probable-package-level.pdf'>
+	"<plotInFileNamed: 'repartition-probable-package-level.pdf'>"
 	| data |
 	data := self repartitionMagicLiteralsAtProbablePackageLevelData.
 	^ MLBScatterPlot2 new
@@ -106,4 +164,25 @@ MLIPAnalysis >> repartitionMagicLiteralsAtProbablePackageLevelPlot [
 				title: '# magic literals in all methods of all classes of the package'; max: 5000";
 				logScale" ];
 		yourself.
+]
+
+{ #category : #accessing }
+MLIPAnalysis >> typeAggregationDict [
+	^ { 
+	SmallInteger -> Integer.
+	ByteString -> String.
+	ByteSymbol -> Symbol.
+	Array -> Array.
+	False -> Boolean.
+	UndefinedObject -> UndefinedObject.
+	True -> Boolean.
+	Character -> Character.
+	SmallFloat64 -> Float.
+	LargePositiveInteger -> Integer.
+	ByteArray -> ByteArray.
+	LargeNegativeInteger -> Integer.
+	WideString -> String.
+	ScaledDecimal -> ScaledDecimal.
+	BoxedFloat64 -> Float.
+	WideSymbol -> Symbol } asDictionary
 ]
