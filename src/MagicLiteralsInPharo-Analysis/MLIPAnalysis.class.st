@@ -127,6 +127,7 @@ MLIPAnalysis >> literalsOccurencesInTestsAndNonTestsLatexTable [
 			assoc value allButFirst do: [ :v | stream nextPutAll: ((v * 100) printShowingDecimalPlaces: 2) ] separatedBy: [ stream nextPutAll: ' & ' ].
 			stream nextPutAll: ' \\',String lf ].
 		stream nextPutAll: '\hline',String lf.
+		stream nextPutAll: 'Total & \multicolumn{10}{|l}{' , self allLiteralNodesNotInLiteralArray size printString , '}',String lf.
 		stream nextPutAll: '\end{tabular}' ].
 ]
 
