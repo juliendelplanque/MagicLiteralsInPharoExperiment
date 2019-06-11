@@ -3,7 +3,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'databaseFile',
-		'literalsOccurencesInTestsAndNonTests'
+		'allLiteralNodesNotInLiteralArrayGroupedByType'
 	],
 	#category : #'MagicLiteralsInPharo-Analysis'
 }
@@ -25,6 +25,25 @@ MLIPAnalysis >> allLiteralNodes [
 { #category : #computation }
 MLIPAnalysis >> allLiteralNodesNotInLiteralArray [
 	^ self allLiteralNodes reject: [ :node | node parent class = RBLiteralArrayNode ]
+]
+
+{ #category : #computation }
+MLIPAnalysis >> allLiteralNodesNotInLiteralArrayGroupedByType [
+	^ allLiteralNodesNotInLiteralArrayGroupedByType ifNil: [
+		allLiteralNodesNotInLiteralArrayGroupedByType := self allLiteralNodesNotInLiteralArray groupedBy: [ :n |
+		self typeAggregationDict at: n value class ] ]
+]
+
+{ #category : #computation }
+MLIPAnalysis >> allLiteralNodesNotInLiteralArrayNorInTest [
+	^ self allLiteralNodesNotInLiteralArray
+		reject: [ :node | (node parents first propertyAt: #isFromTestCase) ]
+]
+
+{ #category : #computation }
+MLIPAnalysis >> allLiteralNodesNotInLiteralArrayNorInTestGroupedByType [
+	^ self allLiteralNodesNotInLiteralArrayNorInTest groupedBy: [ :n |
+		self typeAggregationDict at: n value class ]
 ]
 
 { #category : #accessing }
@@ -67,28 +86,47 @@ MLIPAnalysis >> generatePlotsIn: aDirectory [
 
 { #category : #computation }
 MLIPAnalysis >> literalsOccurencesInTestsAndNonTests [
-	^ literalsOccurencesInTestsAndNonTests ifNil: [ 
-		literalsOccurencesInTestsAndNonTests := (((self allLiteralNodesNotInLiteralArray 
-			groupedBy: [ :l | self typeAggregationDict at: l value class ]) collect: [ :literals | 
-		|fromTestCases|
+	| allLiteralNodesNotInLiteralArrayCount |
+	allLiteralNodesNotInLiteralArrayCount := self allLiteralNodesNotInLiteralArray size.
+	^ (self allLiteralNodesNotInLiteralArrayGroupedByType collect: [ :literals | 
+		|fromTestCases groupedByParentClass|
 		fromTestCases := literals select: [ :node | node parents first propertyAt: #isFromTestCase ].
-		{ literals size . fromTestCases size / literals size. (literals size - fromTestCases size) / literals size } ]) associations sort: [ :assoc | assoc value first ] asSortFunction reversed) ]
+		groupedByParentClass := (literals groupedBy: [ :n | n parent class ]) collect: #size.
+		self parentNodeClasses do: [ :c |
+			groupedByParentClass at: c ifAbsentPut: [ 0 ] ].
+		groupedByParentClass := groupedByParentClass associations sorted: [ :assoc | self parentNodeClasses indexOf: assoc key ] asSortFunction.
+		{
+			literals size .
+			literals size / allLiteralNodesNotInLiteralArrayCount.
+			fromTestCases size / literals size.
+			(literals size - fromTestCases size) / literals size
+		} ,
+		(groupedByParentClass collect: [ :assoc | assoc value / literals size ])  ]) associations sort: [ :assoc | assoc value first ] asSortFunction reversed
 ]
 
-{ #category : #latexing }
+{ #category : #computation }
 MLIPAnalysis >> literalsOccurencesInTestsAndNonTestsLatexTable [
 	<latexInFileNamed: 'occurences-tests-nontests.tex'>
 	^ String streamContents: [ :stream |
-		stream nextPutAll: '\begin{tabular}{l|c|c|c}'.
-		stream nextPutAll: 'Class & Total Occurences & \% in tests & \% in non-tests \\',String lf.
+		stream nextPutAll: '\begin{tabular}{l||c|c||c|c||' , ((self parentNodeNames collect: [ :name | 'c' ]) joinUsing: '|') , '}'.
+		stream nextPutAll: '& \multicolumn{2}{|c||}{General} & \multicolumn{2}{|c||}{\% tests vs non-tests} & \multicolumn{6}{|c}{\% kind of parent node} \\'.
+		stream nextPut: Character lf.
+		stream nextPutAll: '\hline' , String lf.
+		stream nextPutAll: 'Class & Count & Overall \% & tests & non-tests & ' , (self parentNodeNames joinUsing: ' & ') , ' \\',String lf.
 		stream nextPutAll: '\hline\hline',String lf.
 		self literalsOccurencesInTestsAndNonTests do: [ :assoc |
-			stream nextPutAll: assoc key printString.
+			assoc key = ScaledDecimal
+				ifTrue: [ stream nextPutAll: 'ScaledDec.' ]
+				ifFalse: [ 
+					assoc key = UndefinedObject
+						ifTrue: [ stream nextPutAll: 'Undef.Obj.' ]
+						ifFalse: [ stream nextPutAll: assoc key printString ] ].
 			stream nextPutAll: ' & '.
 			stream nextPutAll: assoc value first printString.
 			stream nextPutAll: ' & '.
 			assoc value allButFirst do: [ :v | stream nextPutAll: ((v * 100) printShowingDecimalPlaces: 2) ] separatedBy: [ stream nextPutAll: ' & ' ].
 			stream nextPutAll: ' \\',String lf ].
+		stream nextPutAll: '\hline',String lf.
 		stream nextPutAll: '\end{tabular}' ].
 ]
 
@@ -106,6 +144,16 @@ MLIPAnalysis >> literalsOccurencesInTestsAndNonTestsPlot [
 			xAxis
 				labelsRotation: 90 ]
 		yourself
+]
+
+{ #category : #accessing }
+MLIPAnalysis >> parentNodeClasses [
+	^ { RBMessageNode. RBAssignmentNode. RBReturnNode. RBSequenceNode. RBPragmaNode. RBArrayNode }
+]
+
+{ #category : #accessing }
+MLIPAnalysis >> parentNodeNames [
+	^ self parentNodeClasses collect: [ :c | (c name allButFirst: 'RB' size) allButLast: 'Node' size ]
 ]
 
 { #category : #computation }
