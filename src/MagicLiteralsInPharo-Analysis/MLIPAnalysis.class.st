@@ -89,9 +89,15 @@ MLIPAnalysis >> literalsOccurencesInTestsAndNonTests [
 	| allLiteralNodesNotInLiteralArrayCount |
 	allLiteralNodesNotInLiteralArrayCount := self allLiteralNodesNotInLiteralArray size.
 	^ (self allLiteralNodesNotInLiteralArrayGroupedByType collect: [ :literals | 
-		|fromTestCases groupedByParentClass|
+		|fromTestCases groupedByParentClass withMessageParents|
 		fromTestCases := literals select: [ :node | node parents first propertyAt: #isFromTestCase ].
-		groupedByParentClass := (literals groupedBy: [ :n | n parent class ]) collect: #size.
+		groupedByParentClass := (literals groupedBy: [ :n | n parent class ]).
+		withMessageParents := (groupedByParentClass at: RBMessageNode ifAbsent: [ #() ]) groupedBy: [ :n |
+			n parent receiver = n
+				ifTrue: [ #receiver ]
+				ifFalse: [ #arg ] ].
+		groupedByParentClass removeKey: RBMessageNode.
+		groupedByParentClass := groupedByParentClass collect: #size.
 		self parentNodeClasses do: [ :c |
 			groupedByParentClass at: c ifAbsentPut: [ 0 ] ].
 		groupedByParentClass := groupedByParentClass associations sorted: [ :assoc | self parentNodeClasses indexOf: assoc key ] asSortFunction.
@@ -99,7 +105,9 @@ MLIPAnalysis >> literalsOccurencesInTestsAndNonTests [
 			literals size .
 			literals size / allLiteralNodesNotInLiteralArrayCount.
 			fromTestCases size / literals size.
-			(literals size - fromTestCases size) / literals size
+			(literals size - fromTestCases size) / literals size.
+			(withMessageParents at: #receiver) size / literals size.
+			(withMessageParents at: #arg) size / literals size.
 		} ,
 		(groupedByParentClass collect: [ :assoc | assoc value / literals size ])  ]) associations sort: [ :assoc | assoc value first ] asSortFunction reversed
 ]
@@ -109,10 +117,10 @@ MLIPAnalysis >> literalsOccurencesInTestsAndNonTestsLatexTable [
 	<latexInFileNamed: 'occurences-tests-nontests.tex'>
 	^ String streamContents: [ :stream |
 		stream nextPutAll: '\begin{tabular}{l||c|c||c|c||' , ((self parentNodeNames collect: [ :name | 'c' ]) joinUsing: '|') , '}'.
-		stream nextPutAll: '& \multicolumn{2}{|c||}{General} & \multicolumn{2}{|c||}{\% tests vs non-tests} & \multicolumn{6}{|c}{\% kind of parent node} \\'.
+		stream nextPutAll: '& \multicolumn{2}{|c||}{General} & \multicolumn{2}{|c||}{\% tests vs non-tests} & \multicolumn{7}{|c}{\% kind of parent node} \\'.
 		stream nextPut: Character lf.
 		stream nextPutAll: '\hline' , String lf.
-		stream nextPutAll: 'Class & Count & Overall \% & tests & non-tests & ' , (self parentNodeNames joinUsing: ' & ') , ' \\',String lf.
+		stream nextPutAll: 'Class & Count & \% & tests & non-tests & ' , (self parentNodeNames joinUsing: ' & ') , ' \\',String lf.
 		stream nextPutAll: '\hline\hline',String lf.
 		self literalsOccurencesInTestsAndNonTests do: [ :assoc |
 			assoc key = ScaledDecimal
@@ -127,7 +135,7 @@ MLIPAnalysis >> literalsOccurencesInTestsAndNonTestsLatexTable [
 			assoc value allButFirst do: [ :v | stream nextPutAll: ((v * 100) printShowingDecimalPlaces: 2) ] separatedBy: [ stream nextPutAll: ' & ' ].
 			stream nextPutAll: ' \\',String lf ].
 		stream nextPutAll: '\hline',String lf.
-		stream nextPutAll: 'Total & \multicolumn{10}{|l}{' , self allLiteralNodesNotInLiteralArray size printString , '}',String lf.
+		stream nextPutAll: 'Total & \multicolumn{11}{|l}{' , self allLiteralNodesNotInLiteralArray size printString , '}',String lf.
 		stream nextPutAll: '\end{tabular}' ].
 ]
 
@@ -149,12 +157,13 @@ MLIPAnalysis >> literalsOccurencesInTestsAndNonTestsPlot [
 
 { #category : #accessing }
 MLIPAnalysis >> parentNodeClasses [
-	^ { RBMessageNode. RBAssignmentNode. RBReturnNode. RBSequenceNode. RBPragmaNode. RBArrayNode }
+	^ { RBAssignmentNode. RBReturnNode. RBSequenceNode. RBPragmaNode. RBArrayNode }
 ]
 
 { #category : #accessing }
 MLIPAnalysis >> parentNodeNames [
-	^ self parentNodeClasses collect: [ :c | (c name allButFirst: 'RB' size) allButLast: 'Node' size ]
+	^ (#('Receiver' 'Arg.') , (self parentNodeClasses collect: [ :c | (c name allButFirst: 'RB' size) allButLast: 'Node' size ]))
+			replaceAll: 'Assignment' with: 'Assign.'
 ]
 
 { #category : #computation }
