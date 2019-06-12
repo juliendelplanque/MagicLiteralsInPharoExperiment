@@ -42,7 +42,7 @@ MLIPStringFilter >> isNotMagicLiteral: literalNode [
 	^ literalNode class = RBLiteralValueNode
 		and: [ literalNode value isString
 				and: [ literalNode value isEmpty
-						or: [ (literalNode value mlipKnownWordsRatioWith: self trie) > self knownWordsRatioThreshold ] ] ]
+						or: [ literalNode value size > 3 and: [ (literalNode value mlipKnownWordsRatioWith: self trie) > self knownWordsRatioThreshold ] ] ] ]
 ]
 
 { #category : #testing }

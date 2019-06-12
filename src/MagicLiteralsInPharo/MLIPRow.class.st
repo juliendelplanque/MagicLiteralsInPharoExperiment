@@ -15,5 +15,7 @@ MLIPRow >> gtInspectorSourceIn: composite [
 	^ composite pharoMethod
 		title: 'Source';
 		smalltalkClass: [ Object ];
-		display: [ self atColumnNamed: 'source_code' ]
+		display: [ self atColumnNamed: 'source_code' ];
+		withLineNumbers: true;
+		withAnnotation: true
 ]
